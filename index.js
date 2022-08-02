@@ -5,18 +5,25 @@ const config = require("./config.json");
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: null,
+    userDataDir: ".data"
   });
   const page = await browser.newPage();
-  await page.goto('https://visa.vfsglobal.com/can/en/nld/login');
-
-  // Login Page
-  await page.waitForSelector("#mat-input-0");
-  await page.type("#mat-input-0", config.username);
-  await page.type("#mat-input-1", config.password);
-  await page.click("button.mat-button-base");
+  await page.goto('https://visa.vfsglobal.com/can/en/nld/dashboard');
   await page.waitForNavigation();
 
-  // Home Page
+  // Login Page
+  const signInButtonXPath = "//button/span[contains(text(), 'Sign In')]";
+  if ((await page.$x(signInButtonXPath)).length > 0) {
+    await page.waitForSelector("#mat-input-0");
+    await page.type("#mat-input-0", config.username);
+
+    await page.waitForSelector("#mat-input-1");
+    await page.type("#mat-input-1", config.password);
+
+    await page.$x(signInButtonXPath).click();
+  }
+
+  // Dashboard Page
   const bookButtonXPath = "//button/span[contains(text(), 'Start New Booking')]";
   await page.waitForXPath(bookButtonXPath);
   await page.waitForTimeout(10000);
